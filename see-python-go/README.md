@@ -593,6 +593,8 @@ the sake of some laughs:
 * https://blog.filippo.io/building-python-modules-with-go-1-5/
 * https://github.com/golang/go/wiki/cgo
 
+* https://github.com/sbinet/go-python
+
 
 * https://feiskyer.github.io/2016/04/19/cgo-in-go-1-6/
 

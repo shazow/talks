@@ -1,40 +1,296 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Title</title>
-    <meta charset="utf-8">
-    <style>
-      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
-      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
-      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+    <head>
+        <title>See Python Go</title>
+        <meta charset="utf-8">
+        <style>
+            @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+            @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+            @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
 
-      body { font-family: 'Droid Serif'; }
-      h1, h2, h3 {
-        font-family: 'Yanone Kaffeesatz';
-        font-weight: normal;
-      }
-      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
-    </style>
-  </head>
-  <body>
-    <textarea id="source">
+            body {
+                font-family: 'Droid Serif';
+            }
+            h1, h2, h3 {
+                font-family: 'Yanone Kaffeesatz';
+                font-weight: normal;
+            }
+            .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+            .gopher img, .owl img { width: 50%; height: 50%; }
+            .footnote {
+                color: #666; font-size: 0.8em;
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                margin: 1em;
+            }
+            ul, ol {
+                font-size: 1.8rem;
+                line-height: 1.8em;
+                color: #333;
+            }
+            h4 {
+                margin-bottom: 0;
+                margin-top: 1.5em;
+            }
+        </style>
+    </head>
+    <body>
+        <textarea id="source">
 
 class: center, middle
 
-# Title
+# See Python, See Python Go, Go Python Go
+
+Presented by **Andrey Petrov** at **PyCon 2016**
 
 ---
 
-# Agenda
+# Do you Go?
 
-1. Introduction
-2. Deep-dive
-3. ...
+--
+- Simple syntax that is easy to learn
+
+--
+- Compiles superfast
+
+--
+- Statically typed
+
+--
+- Statically linked binaries
+
+--
+- Cross-compiles to ~every platform
+
+--
+- Easy concurrency
+
+--
+- Great standard library
 
 ---
 
-# Introduction
+class: middle, center
 
+# Python 💞  Go
+
+.gopher[![PyGopher](images/pygopher.png)]
+
+.footnote[Credit: Renee French &amp; Alice Tribuleva]
+
+---
+
+# Fun Facts
+
+- Python speaks with C
+
+--
+- Go speaks with C
+
+--
+- Therefore, Python speaks with Go?
+
+???
+C can act as a bridge between any two languages that can call to/from C.
+
+---
+
+# Challenges
+
+1. Runtime barriers
+--
+
+   - Garbage Collectors (GC)
+   - Global Interpreter Lock (GIL)
+   - Thread Pools
+   - Just In Time compiling in PyPy (JIT)
+--
+
+2. Syntax and feature barriers
+--
+
+   - Go: Interface, Goroutines, etc.
+   - Python: Classes, Generators, etc.
+   - Oodles of other language-specific constructs
+
+
+---
+
+# Let's take a moment and imagine...
+
+---
+
+# Running a webserver in Go
+
+```go
+package main
+
+import (
+    "fmt"
+    "net/http"
+)
+
+func index(w http.ResponseWriter, req *http.Request) {
+    fmt.Fprintf(w, "Hello, world.\n")
+}
+
+func main() {
+    http.HandleFunc("/", index)
+    http.ListenAndServe("127.0.0.1:5000", nil)
+}
+```
+
+---
+
+# Running a webserver in Python
+
+```python
+from flask import Flask
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return 'Hello, world!\n'
+
+if __name__ == '__main__':
+    app.run(host='127.0.0.1', port=5000)
+```
+
+---
+
+# Running a Go webserver in Python??
+
+```python
+from gohttp import route, run
+
+@route('/')
+def index(w, req):
+    w.write("Hello, world.\n")
+
+if __name__ == '__main__':
+    run(host='127.0.0.1', port=5000)
+```
+
+--
+
+### Compare
+
+```python
+from flask import Flask
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return 'Hello, world!\n'
+
+if __name__ == '__main__':
+    app.run(host='127.0.0.1', port=5000)
+```
+
+---
+
+# Comparing handlers
+
+#### Go (net/http)
+
+```go
+func index(w http.ResponseWriter, req *http.Request) {
+    fmt.Fprintf(w, "Hello, world.\n")
+}
+```
+
+#### Go in Python (gohttplib)
+
+```python
+def index(w, req):
+    w.write("Hello, world.\n")
+```
+
+#### Python (flask)
+
+```python
+def index():
+    return 'Hello, world!\n'
+```
+
+???
+Translating a Go API into Python is a fun subjective exercise. It doesn't need
+to look like this, but it's a good example.
+
+---
+
+class: center
+
+# gohttplib
+
+### This is an actual functioning thing.
+
+[github.com/shazow/gohttplib](https://github.com/shazow/gohttplib)
+
+--
+
+### &nbsp;
+
+### Sponsored by [Glider Labs](http://gliderlabs.com/)
+
+### 💝
+
+---
+
+class: center, middle
+
+# Here's how it works...
+
+---
+
+# The Plan
+
+1. Export Go functions to a C shared library
+
+2. ???
+
+3. Call C from Python
+
+4. ![Owl](images/owl.png)
+
+---
+
+# Calling Go from C
+
+```go
+package main
+
+import "C"
+
+//export TheAnswer
+func TheAnswer() C.int {
+	return C.int(42)
+}
+
+func main() {}
+```
+
+--
+
+```bash
+$ go build -buildmode=c-shared -o libanswer.so
+```
+
+--
+
+```c
+#include <stdio.h>
+#include "libanswer.h"
+
+int main() {
+    int r = TheAnswer();
+    printf("%d\n", r);
+    return 0;
+}
+```
+
+---
     </textarea>
     <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
     </script>
