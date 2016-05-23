@@ -495,9 +495,6 @@ from ._gohttplib import ffi
 
 lib = ffi.dlopen(os.path.join(os.path.dirname(__file__), "libgohttp.so"))
 
-# Hang onto handlers so they don't get gc'd
-_handlers = []
-
 
 class ResponseWriter:
     def __init__(self, w):
@@ -549,7 +546,6 @@ def route(pattern, fn=None):
             fn(ResponseWriter(w), Request(req))
 
         lib.HandleFunc(pattern, handler)
-        _handlers.append(handler)
 
     if fn:
         return wrapped(fn)

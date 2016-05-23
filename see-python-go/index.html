@@ -17,6 +17,7 @@
             }
             .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
             .gopher img, .owl img { width: 50%; height: 50%; }
+            .full-image img { width: 100%; height: 100%; }
             .footnote {
                 color: #666; font-size: 0.8em;
                 position: absolute;
@@ -103,8 +104,8 @@ C can act as a bridge between any two languages that can call to/from C.
 
    - Garbage Collectors (GC)
    - Global Interpreter Lock (GIL)
-   - Thread Pools
    - Just In Time compiling in PyPy (JIT)
+   - Thread Pools
 --
 
 2. Syntax and feature barriers
@@ -114,6 +115,16 @@ C can act as a bridge between any two languages that can call to/from C.
    - Python: Classes, Generators, etc.
    - Oodles of other language-specific constructs
 
+
+---
+
+class: full-image
+
+![Runtimes](images/runtimes.svg)
+
+???
+C land is a beautiful barren wasteland of buffer overflows, memory leaks, and
+segmentation faults.
 
 ---
 
@@ -246,13 +257,47 @@ class: center, middle
 
 # The Plan
 
-1. Export Go functions to a C shared library
+1. Go: Export Go functions to a C shared library
 
-2. ???
+2. C: 😰
 
-3. Call C from Python
+3. Python: Call C from Python
 
 4. ![Owl](images/owl.png)
+
+
+---
+
+class: full-image
+
+![World of Go](images/worldofgo.png)
+
+---
+
+# Calling C from Go
+
+```go
+package main
+
+/*
+int the_answer() {
+	return 42;
+}
+*/
+import "C"
+import "fmt"
+
+func main() {
+	r := C.the_answer()
+	fmt.Println(r)
+}
+```
+
+--
+
+```bash
+$ go build
+```
 
 ---
 
@@ -287,6 +332,298 @@ int main() {
     int r = TheAnswer();
     printf("%d\n", r);
     return 0;
+}
+```
+
+---
+
+class: full-image
+
+![World of Python](images/worldofpython.png)
+
+---
+
+# See CPython C
+
+- [CPython Extension Interface](https://docs.python.org/3/extending/extending.html):
+  no dependencies, but lots of boilerplate
+
+- [CFFI](https://cffi.readthedocs.io/):
+  a little more magic but does more work for us and more portable
+
+???
+If you've ever seen PyObject and whatnot littered around a C file, that's the
+CPython extension interface.
+
+On the other hand, CFFI is also available in PyPy and other fun implementations
+of the language.
+
+---
+
+# Calling C from Python
+
+```python
+# answer_build.py:
+from cffi import FFI
+ffi = FFI()
+
+ffi.cdef("int the_answer();")
+
+ffi.set_source("_answer", """
+    int the_answer() {
+        return 42;
+    }
+""")
+
+if __name__ == "__main__":
+    ffi.compile()
+```
+
+--
+
+```bash
+$ python answer_build.py
+$ ls
+_answer.c       _answer.o       _answer.so      answer_build.py
+```
+
+--
+
+```python
+# answer.py:
+from _answer import lib
+
+print(lib.the_answer())
+```
+
+---
+
+# Calling Python from C
+
+Simple function pointer that can be used in C:
+
+```python
+@ffi.callback("int(int, int)")
+def add(x, y):
+    return x + y
+```
+
+--
+
+.center[
+### 👋 
+
+~handwaving~
+
+### 👋
+]
+
+--
+
+```c
+static int (*add)(int x, int b);
+```
+
+That's all we need for now. [More on CFFI embedding here](http://cffi.readthedocs.io/en/latest/embedding.html).
+
+---
+
+# Challenges
+
+1. Runtime barriers
+   - Garbage Collectors (GC)
+   - Global Interpreter Lock (GIL)
+   - Just In Time compiling in PyPy (JIT)
+   - Thread Pools
+2. Syntax and feature barriers
+   - Go: Interface, Goroutines, etc.
+   - Python: Classes, Generators, etc.
+   - Oodles of other language-specific constructs
+
+---
+
+# Overcoming Challenges
+
+1. Don't share memory
+
+--
+
+2. Translation layer
+
+--
+
+3. Seriously, don't share memory
+
+---
+
+# Challenge 1: Don't share memory
+
+```go
+http.HandleFunc(pattern, func(w http.ResponseWriter, req *http.Request) {
+    ...
+})
+```
+
+Our Python code will need to provide this callback, but we can't pass `*http.Request` to Python.
+
+--
+
+```c
+typedef struct Request_
+{
+    const char *Method;
+    const char *Host;
+    ...
+} Request;
+```
+
+--
+
+```go
+http.HandleFunc(pattern, func(w http.ResponseWriter, req *http.Request) {
+    // Wrap relevant request fields in a C-friendly datastructure.
+    creq := C.Request{
+        Method: C.CString(req.Method),
+        Host:   C.CString(req.Host),
+        ...
+    }
+    ...
+```
+
+---
+
+# Challenge 2: Translation layer
+
+```go
+http.HandleFunc(pattern, func(w http.ResponseWriter, req *http.Request) {
+    ...
+})
+```
+
+Our Python code will need to use the `http.ResponseWriter` interface.
+
+--
+
+```go
+ResponseWriter.Write([]byte) (int, error)
+ResponseWriter.WriteHeader(int)
+```
+
+--
+
+```go
+//export ResponseWriter_Write
+func ResponseWriter_Write(wPtr C.uint, cbuf *C.char, length C.int) C.int {
+	buf := C.GoBytes(unsafe.Pointer(cbuf), length)
+    ...
+	n, _ := (*(*http.ResponseWriter)(w)).Write(buf)
+	return C.int(n)
+}
+
+//export ResponseWriter_WriteHeader
+func ResponseWriter_WriteHeader(wPtr C.uint, header C.int) {
+    ...
+	(*(*http.ResponseWriter)(w)).WriteHeader(int(header))
+}
+```
+
+---
+
+# Challenge 2: Translation layer (Cont.)
+
+We exported these functions in Go
+
+```go
+ResponseWriter_Write(wPtr C.uint, cbuf *C.char, length C.int) C.int
+ResponseWriter_WriteHeader(wPtr C.uint, header C.int)
+```
+
+Now we can wrap them in Python
+
+```python
+lib = ffi.dlopen(...)
+
+class ResponseWriter:
+    def __init__(self, w):
+        self._w = w
+
+    def write(self, body):
+        n = lib.ResponseWriter_Write(self._w, body, len(body))
+        if n != len(body):
+            raise IOError("Failed to write to ResponseWriter.")
+
+    def set_status(self, code):
+        lib.ResponseWriter_WriteHeader(self._w, code)
+```
+
+---
+
+# Challenge 3: Seriously, don't share memory
+
+* Wait, what's a Go interface?
+
+--
+
+* To use it, we need to pass a *pointer* through </br >
+  Go → C → Python → C → Go.
+
+--
+
+* Solution: Pointer Proxy!
+
+---
+
+# Pointer Proxy Pattern
+
+```go
+type ptrProxy struct {
+	sync.Mutex
+	count  uint
+	lookup map[uint]unsafe.Pointer
+}
+
+func (p *ptrProxy) Ref(ptr unsafe.Pointer) C.uint { ... }
+
+func (p *ptrProxy) Deref(id C.uint) (unsafe.Pointer, bool) { ... }
+
+func (p *ptrProxy) Free(id C.uint) { ... }
+```
+
+Now we can pass an opaque uint across enemy lines and it's perfectly safe.
+
+---
+
+# Quick flashback: Translation layer
+
+One pointer proxy to rule them all.
+
+```go
+var cpointers = PtrProxy()
+```
+
+--
+
+In the callback, reference to bind them.
+
+```go
+http.HandleFunc(pattern, func(w http.ResponseWriter, req *http.Request) {
+    // Wrap relevant request fields in a C-friendly datastructure.
+    creq := C.Request{ ... }
+
+    wPtr := cpointers.Ref(unsafe.Pointer(&w))
+    ...
+    cpointers.Free(wPtr)
+})
+```
+
+--
+
+With pointer proxy, dereference to find them.
+
+```go
+func ResponseWriter_WriteHeader(wPtr C.uint, header C.int) {
+	w, _ := cpointers.Deref(wPtr)
+	(*(*http.ResponseWriter)(w)).WriteHeader(int(header))
 }
 ```
 
