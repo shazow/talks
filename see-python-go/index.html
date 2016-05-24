@@ -25,6 +25,8 @@
                 left: 0;
                 margin: 1em;
             }
+            table { width: 100%; line-height: 1.5em; font-size: 1.2em; text-align: right; }
+            thead { text-align: right; }
             ul, ol {
                 font-size: 1.8rem;
                 line-height: 1.8em;
@@ -34,6 +36,12 @@
             h4 {
                 margin-bottom: 0;
                 margin-top: 1.5em;
+            }
+            .remark-slide-number::before {
+                content: "@shazow";
+                position: fixed;
+                left: 45%;
+                color: #6b1f03;
             }
         </style>
     </head>
@@ -71,6 +79,9 @@ Presented by **Andrey Petrov** at **PyCon 2016**
 --
 - Great standard library
 
+--
+- Gophers!
+
 ---
 
 class: middle, center
@@ -105,8 +116,8 @@ C can act as a bridge between any two languages that can call to/from C.
 
    - Garbage Collectors (GC)
    - Global Interpreter Lock (GIL)
-   - Just In Time compiling in PyPy (JIT)
-   - Thread Pools
+   - Just In Time compiling (JIT)
+   - Resource Pools (Threads)
 --
 
 2. Syntax and feature barriers
@@ -262,9 +273,9 @@ class: center, middle
 
 2. C: 😰
 
-3. Python: Call C from Python
+3. Python: Call C and wrap it in a Python-shaped bow
 
-4. ![Owl](images/owl.png)
+4. Make it actually work ¯\\\_(ツ)\_/¯ 
 
 
 ---
@@ -297,7 +308,9 @@ func main() {
 --
 
 ```bash
-$ go build
+$ go build -o answer
+$ ./answer
+42
 ```
 
 ---
@@ -440,6 +453,12 @@ That's all we need for now. [More on CFFI embedding here](http://cffi.readthedoc
    - Go: Interface, Goroutines, etc.
    - Python: Classes, Generators, etc.
    - Oodles of other language-specific constructs
+
+---
+
+class: full-image
+
+![Runtimes](images/runtimes.svg)
 
 ---
 
@@ -760,18 +779,44 @@ func ResponseWriter_WriteHeader(wPtr C.uint, header C.int) {
 
 ---
 
+class: full-image, center
+
 # LOLBENCHMARKS
 
-silly benchmarks go here
+![lolbenchmarks](images/lolbenchmarks.png)
 
 
 ---
 
-# Links
+class: center
+
+# LOLBENCHMARKS
+
+| Name | Total | Req/Sec | Time/Req |
+|-|-|-|-|
+| go-net/http | 1.115 | 8969.89 | 0.111 |
+| gohttp-c | 1.181 | 8470.97 | 0.118 |
+| gohttp-python | 1.285 | 7779.87 | 0.129 |
+| gunicorn-flask | 7.826 | 1277.73 | 0.783 |
+| werkzeug-flask | 15.029 | 665.37 | 1.503 |
+
+# 🎉
+
+<small>Conditions: `ab` doing 10,000 requests with 10 concurrency on my 💻.</small>
+
+
+---
+
+# Thank you
 
 * [github.com/shazow/gohttplib](https://github.com/shazow/gohttplib)
 * [twitter.com/shazow](https://twitter.com/shazow)
 * [shazow.net](https://shazow.net/)
+
+.center[
+![shazow](images/shazow.png)
+]
+
 
 ---
     </textarea>
