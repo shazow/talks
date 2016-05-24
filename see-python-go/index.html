@@ -30,6 +30,7 @@
                 line-height: 1.8em;
                 color: #333;
             }
+            ol code { font-size: 0.8em; }
             h4 {
                 margin-bottom: 0;
                 margin-top: 1.5em;
@@ -444,15 +445,7 @@ That's all we need for now. [More on CFFI embedding here](http://cffi.readthedoc
 
 # Overcoming Challenges
 
-1. Don't share memory
-
---
-
-2. Translation layer
-
---
-
-3. Seriously, don't share memory
+1. **Don't share memory**
 
 ---
 
@@ -489,6 +482,14 @@ http.HandleFunc(pattern, func(w http.ResponseWriter, req *http.Request) {
     }
     ...
 ```
+
+---
+
+# Overcoming Challenges
+
+1. Don't share memory
+
+2. **Translation layer**
 
 ---
 
@@ -558,6 +559,58 @@ class ResponseWriter:
 
 ---
 
+# Challenge 2: Translation layer (Cont.)
+
+Original interface in Go:
+
+```go
+type http.ResponseWriter interface { WriteHeader(int) }
+```
+
+--
+
+Exported interface from Go:
+
+```go
+func ResponseWriter_WriteHeader(wPtr C.uint, header C.int)
+```
+
+--
+
+C header:
+
+```c
+void ResponseWriter_WriteHeader(unsigned int p0, int p1);
+```
+
+--
+
+Accessing C from Python:
+
+```python
+ResponseWriter_WriteHeader(w, header)
+```
+
+--
+
+Python wrapper:
+
+```python
+ResponseWriter.set_status(self, code)
+```
+
+---
+
+# Overcoming Challenges
+
+1. Don't share memory
+
+2. Translation layer
+
+3. **Seriously, don't share memory**
+
+---
+
 # Challenge 3: Seriously, don't share memory
 
 * Wait, what's a Go interface?
@@ -573,7 +626,15 @@ class ResponseWriter:
 
 ---
 
-# Pointer Proxy Pattern
+class: full-image
+
+# Pointer Proxy
+
+![Pointer Proxy](images/ptrproxy.svg)
+
+---
+
+# Pointer Proxy
 
 ```go
 type ptrProxy struct {
@@ -626,6 +687,91 @@ func ResponseWriter_WriteHeader(wPtr C.uint, header C.int) {
 	(*(*http.ResponseWriter)(w)).WriteHeader(int(header))
 }
 ```
+
+---
+
+# Recap
+
+* If our languages can speak with C, they can speak with each other.
+
+--
+
+* Be careful going in and out of runtimes.
+
+--
+
+* Be super-careful with sharing memory.
+
+--
+
+* We'll need a translation layer to use non-trivial language constructs.
+
+???
+- C makes for a handy bridge between languages. Other languages without required runtimes can also work, like Rust.
+- Conflicting runtimes throw all assumptions out the window, memory can move, it can disappear, it can change.
+- Copy data into C-friendly structs.
+- Pointer proxies are handy for passing a reference to some memory without the memory itself.
+- C code is C code, but once the call reaches our destination we can make it look as pretty and idiomatic as we'd like.
+
+---
+
+# Other Considerations
+
+--
+
+* Memory leaks
+
+--
+
+* Race conditions
+
+--
+
+* Context switching overhead
+
+--
+
+* Probably security vulnerabilities because C is hard
+
+--
+
+* Architecture spaghetti
+
+???
+- The examples here are super rough, you'll likely need to explicitly free any memory allocated for C.
+- If you're not careful with GILs and whatnot, you'll likely get race conditions.
+- Switching across runtimes does have overhead, such as thread-switching. This is a fairly expensive constant-time operation in Go.
+- Anytime you're touching C, beware of vuln dragons.
+- Spaghetti can be delicious but messy.
+
+---
+
+# A Palate Cleanser
+
+--
+
+.center[
+## ✨😂👋
+
+## LOLBENCHMARKS!
+
+## 🙄🔥🍮
+]
+
+---
+
+# LOLBENCHMARKS
+
+silly benchmarks go here
+
+
+---
+
+# Links
+
+* [github.com/shazow/gohttplib](https://github.com/shazow/gohttplib)
+* [twitter.com/shazow](https://twitter.com/shazow)
+* [shazow.net](https://shazow.net/)
 
 ---
     </textarea>
