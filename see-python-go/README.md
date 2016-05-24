@@ -56,6 +56,10 @@ if __name__ == '__main__':
 
 That's right.
 
+Want to give it a try *right now?* Hit this shiny button:
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/shazow/gohttplib-heroku)
+
 
 ## How?
 
@@ -578,7 +582,14 @@ approach. Yes, yes, of course, this isn't *Production Ready* or anything but for
 the sake of some laughs:
 
 
-[[XXX: Benchmarks]]
+| Name | Total | Req/Sec | Time/Req |
+|-|-|-|-|
+| go-net/http | 1.115 | 8969.89 | 0.111 |
+| gohttp-c | 1.181 | 8470.97 | 0.118 |
+| gohttp-python | 1.285 | 7779.87 | 0.129 |
+| gunicorn-flask | 7.826 | 1277.73 | 0.783 |
+| werkzeug-flask | 15.029 | 665.37 | 1.503 |
+
 
 
 ## Appendix
