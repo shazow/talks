@@ -27,7 +27,7 @@
             }
             table { width: 100%; line-height: 1.5em; font-size: 1.2em; text-align: right; }
             thead { text-align: right; }
-            ul, ol {
+            .remark-slide ul, .remark-slide ol {
                 font-size: 1.8rem;
                 line-height: 1.8em;
                 color: #333;
@@ -456,15 +456,15 @@ That's all we need for now. [More on CFFI embedding here](http://cffi.readthedoc
 
 ---
 
-class: full-image
-
-![Runtimes](images/runtimes.svg)
-
----
-
 # Overcoming Challenges
 
 1. **Don't share memory**
+
+---
+
+class: full-image
+
+![Runtimes](images/runtimes.svg)
 
 ---
 
@@ -713,23 +713,29 @@ func ResponseWriter_WriteHeader(wPtr C.uint, header C.int) {
 
 * If our languages can speak with C, they can speak with each other.
 
+???
+- C makes for a handy bridge between languages. Other languages without required runtimes can also work, like Rust.
+
 --
 
 * Be careful going in and out of runtimes.
 
+???
+- Conflicting runtimes throw all assumptions out the window, memory can move, it can disappear, it can change.
+
 --
 
 * Be super-careful with sharing memory.
+
+???
+- Copy data into C-friendly structs.
+- Pointer proxies are handy for passing a reference to some memory without the memory itself.
 
 --
 
 * We'll need a translation layer to use non-trivial language constructs.
 
 ???
-- C makes for a handy bridge between languages. Other languages without required runtimes can also work, like Rust.
-- Conflicting runtimes throw all assumptions out the window, memory can move, it can disappear, it can change.
-- Copy data into C-friendly structs.
-- Pointer proxies are handy for passing a reference to some memory without the memory itself.
 - C code is C code, but once the call reaches our destination we can make it look as pretty and idiomatic as we'd like.
 
 ---
@@ -740,27 +746,35 @@ func ResponseWriter_WriteHeader(wPtr C.uint, header C.int) {
 
 * Memory leaks
 
+???
+- The examples here are super rough, you'll likely need to explicitly free any memory allocated for C.
+
 --
 
 * Race conditions
+
+???
+- If you're not careful with GILs and whatnot, you'll likely get race conditions.
 
 --
 
 * Context switching overhead
 
+???
+- Switching across runtimes does have overhead, such as thread-switching. This is a fairly expensive constant-time operation in Go.
+
 --
 
 * Probably security vulnerabilities because C is hard
+
+???
+- Anytime you're touching C, beware of vuln dragons.
 
 --
 
 * Architecture spaghetti
 
 ???
-- The examples here are super rough, you'll likely need to explicitly free any memory allocated for C.
-- If you're not careful with GILs and whatnot, you'll likely get race conditions.
-- Switching across runtimes does have overhead, such as thread-switching. This is a fairly expensive constant-time operation in Go.
-- Anytime you're touching C, beware of vuln dragons.
 - Spaghetti can be delicious but messy.
 
 ---
