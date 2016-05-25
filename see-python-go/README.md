@@ -575,15 +575,23 @@ function pointer that can be passed back to Go. Luckily, CFFI has a convenient
 Off to the races we go!
 
 
-## Roflbenchmarks
+## lolbenchmarks
 
 It's fun to take a look at the performance characteristics of this kind of 
 approach. Yes, yes, of course, this isn't *Production Ready* or anything but for 
 the sake of some laughs:
 
+<img src="images/lolbenchmarks.png" height="50%" width="50%" alt="lolbenchmarks" />
+
+Conditions: `ab` doing 10,000 requests with 10 concurrency on my 💻.
+
+These are all basic "Hello, world\n" handlers. The first one is straight-up Go, then it's Go-to-C, then it's Go-to-C-to-Python (gohttp-python). It does pretty well.
+
+Keep in mind that this is with 10 concurrent requests, so werkzeug-flask probably chokes more on the concurrency than the response time being slow.
+
 
 | Name | Total | Req/Sec | Time/Req |
-|-|-|-|-|
+|---|---|---|---|
 | go-net/http | 1.115 | 8969.89 | 0.111 |
 | gohttp-c | 1.181 | 8470.97 | 0.118 |
 | gohttp-python | 1.285 | 7779.87 | 0.129 |
