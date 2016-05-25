@@ -598,6 +598,16 @@ Keep in mind that this is with 10 concurrent requests, so werkzeug-flask probabl
 | gunicorn-flask | 7.826 | 1277.73 | 0.783 |
 | werkzeug-flask | 15.029 | 665.37 | 1.503 |
 
+Again, this is for-fun off-the-cuff unscientific lolbenchmarks.
+
+
+## What's left?
+
+We've discussed 80% of what's involved, but some pieces are still left as an exercise for the reader (or maybe a future blog post):
+
+* The `gohttp` Python dependency comes pre-published to PyPI for your convenience, but you'll need build and distribute the dependency yourself if you want to tweak it further.
+* Play whack-a-mole with memory leaks. The current prototype is not safe or battle-tested by any means. Any time a C variable gets declared, we'll need to free it.
+* Implement the rest of the interfaces that we need. Right now there are only a couple of functions available but there is much more to build a full server. [Pull requests welcome!](https://github.com/shazow/gohttplib)
 
 
 ## Appendix
