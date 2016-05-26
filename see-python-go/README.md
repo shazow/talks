@@ -1,12 +1,10 @@
 # See Python, See Python Go, Go Python Go
 
-*(Thunderous voiceover)*
+***(Thunderous voiceover)** In a world, where Python runs Go, and Go runs Python. Nothing is sacred, as two runtimes battle it out in the boiling wasteland called C.*
 
-In a world, where Python runs Go, and Go runs Python. Nothing is sacred, 
+Ahem, hello. This post is a more detailed overview of my PyCon 2016 talk of the same title. Today we're going to make a Python library that is actually the Go webserver forwhich we can write handlers in Python. If you'd like to play along at home, this code was written in Go 1.6 and Python 3.5 and the entire complete working thing is open source and links will be supplied shortly.
 
-Versions:
-* Go 1.6
-* Python 3.5
+First, a refresher:
 
 
 ## Running a webserver in Go
@@ -79,12 +77,14 @@ super-optimized code, you can now run Go code just the same. More or less.
 
 ## Considerations
 
+Before throwing everything away and starting fresh using this new-found power, there are some challenges that need to be considered.
+
 ### Runtime Overhead
 
 When a Go library is used from another runtime, it spins up the Go runtime in
 parallel with the caller's runtime (if any). That is, it gets the goroutine
-threads and the garbage collector and all that other nice stuff you'd normally
-boot up when calling Go on its own.
+threads and the garbage collector and all that other nice stuff that would normally
+be initialized up when calling Go on its own.
 
 This is different than calling vanilla C code because technically there is no
 innate C runtime involved. There is no default worker pools, no default garbage
@@ -114,6 +114,8 @@ treat it as immutable read-only data when it's too big to be copied.
 When mediating calls between two runtimes like Go and Python, we use C land in
 between them as a kind of demilitarized zone because C has no runtime and we
 can trust it to not mess with our data all willynilly.
+
+![Runtime](images/runtime.svg)
 
 
 ## The Plan
