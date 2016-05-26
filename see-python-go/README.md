@@ -610,7 +610,7 @@ Again, this is for-fun off-the-cuff unscientific lolbenchmarks.
 
 ## What's left?
 
-We've discussed 80% of what's involved, but the remaining 80% still remains as an exercise for the reader (or maybe a future blog post):
+We've discussed 80% of what's involved, but the remaining 80% is still available as an exercise for the reader (or maybe a future blog post):
 
 * The `gohttp` Python dependency comes pre-published to PyPI for your convenience, but you'll need build and distribute the dependency yourself if you want to tweak it further.
 * Play whack-a-mole with memory leaks. The current prototype is not safe or battle-tested by any means. Any time a C variable gets declared, we'll need to free it.
