@@ -1,8 +1,8 @@
 # See Python, See Python Go, Go Python Go
 
-***(Thunderous voiceover)** In a world, where Python runs Go, and Go runs Python. Nothing is sacred, as two runtimes battle it out in the boiling wasteland called C.*
+  ***(Thunderous voiceover)*** *In a world, where Python runs Go, and Go runs Python. Nothing is sacred, as two runtimes battle it out in the boiling wasteland called C.*
 
-Ahem, hello. This post is a more detailed overview of my PyCon 2016 talk of the same title. Today we're going to make a Python library that is actually the Go webserver forwhich we can write handlers in Python. If you'd like to play along at home, this code was written in Go 1.6 and Python 3.5 and the entire complete working thing is open source and links will be supplied shortly.
+Ahem, hello. This post is a more detailed overview of my [PyCon 2016 talk of the same title](https://us.pycon.org/2016/schedule/presentation/1633/). Today we're going to make a Python library that is actually the Go webserver forwhich we can write handlers in Python. If you'd like to play along at home, this code was written in Go 1.6 and Python 3.5 and the entire complete working thing is open source (MIT license) and links will be supplied shortly.
 
 First, a refresher:
 
@@ -426,7 +426,6 @@ There is one more weird trick here: We need to pass somekind of reference to
 which interface instance we're talking about, get that back, and call the 
 original interface without passing any memory pointers across the runtime. How 
 do we do that safely? Our own basic pointer registry!
-
 
 ![Pointer Proxy](images/ptrproxy.svg)
 
