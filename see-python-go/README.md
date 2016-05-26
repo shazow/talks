@@ -1,5 +1,9 @@
 # See Python, See Python Go, Go Python Go
 
+*(Thunderous voiceover)*
+
+In a world, where Python runs Go, and Go runs Python. Nothing is sacred, 
+
 Versions:
 * Go 1.6
 * Python 3.5
@@ -129,9 +133,6 @@ provide a Python handler that will get called when our route gets hit.
 
 6. Write our handler to use the C registry bridge in Python, and the helpers to
    interact with the data to create a response.
-
-
-[[XXX: DIAGRAM]]
 
 
 ## World of Go
@@ -422,8 +423,14 @@ where all they do is call the interface's function in Go-land on behalf of C
 There is one more weird trick here: We need to pass somekind of reference to 
 which interface instance we're talking about, get that back, and call the 
 original interface without passing any memory pointers across the runtime. How 
-do we do that safely? Our own ghetto pointer registry!
+do we do that safely? Our own basic pointer registry!
 
+
+![Pointer Proxy](images/ptrproxy.svg)
+
+
+There are three basic operations we care about, each one is just a couple of 
+lines that saves a key in a lookup and the reverse.
 ```go
 type ptrProxy struct {
 	sync.Mutex
@@ -610,24 +617,22 @@ We've discussed 80% of what's involved, but some pieces are still left as an exe
 * Implement the rest of the interfaces that we need. Right now there are only a couple of functions available but there is much more to build a full server. [Pull requests welcome!](https://github.com/shazow/gohttplib)
 
 
-## Appendix
 
-### Useful resources
+## Handy links
 
-* https://github.com/shazow/gohttplib/
+* https://twitter.com/shazow where I post more things like this.
+
+* https://github.com/shazow/gohttplib/ is the source code for this project.
+
+More posts on this topic:
+
 * https://blog.filippo.io/building-python-modules-with-go-1-5/
-* https://github.com/golang/go/wiki/cgo
-
-* https://github.com/sbinet/go-python
-
 
 * https://feiskyer.github.io/2016/04/19/cgo-in-go-1-6/
 
+Automagic code generating:
+
+* https://github.com/sbinet/go-python
+
 * https://github.com/go-python/gopy
 
-
-Additional topics to explore
-
-### CFFI: Different call modes
-
-### CGO: Different build modes
