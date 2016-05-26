@@ -494,8 +494,6 @@ Go-land. We could expand this to cover the full interface but, for the sake of
 our prototype, these two will do.
 
 
-[[ XXX: Diagrams]]
-
 
 ### The Python
 
