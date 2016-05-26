@@ -115,7 +115,8 @@ When mediating calls between two runtimes like Go and Python, we use C land in
 between them as a kind of demilitarized zone because C has no runtime and we
 can trust it to not mess with our data all willynilly.
 
-![Runtime](images/runtime.svg)
+
+![Runtime](images/runtimes.png)
 
 
 ## The Plan
@@ -427,7 +428,7 @@ which interface instance we're talking about, get that back, and call the
 original interface without passing any memory pointers across the runtime. How 
 do we do that safely? Our own basic pointer registry!
 
-![Pointer Proxy](images/ptrproxy.svg)
+![Pointer Proxy](images/ptrproxy.png)
 
 
 There are three basic operations we care about, each one is just a couple of 
