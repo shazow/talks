@@ -1,8 +1,8 @@
 # See Python, See Python Go, Go Python Go
 
-  ***(Thunderous voiceover)*** *In a world, where Python runs Go, and Go runs Python. Nothing is sacred, as two runtimes battle it out in the boiling wasteland called C.*
+  ***(Thunderous voiceover)*** *In a world where Python runs Go and Go runs Python, only one was brave enough to learn their secrets. Nothing is sacred as two runtimes battle it out in the boiling wasteland called C.*
 
-Ahem, hello. This post is a more detailed overview of my [PyCon 2016 talk of the same title](https://us.pycon.org/2016/schedule/presentation/1633/). Today we're going to make a Python library that is actually the Go webserver forwhich we can write handlers in Python. If you'd like to play along at home, this code was written in Go 1.6 and Python 3.5 and the entire complete working thing is open source (MIT license) and links will be supplied shortly.
+Ahem, hello. This post is a more detailed overview of my [PyCon 2016 talk of the same title](https://us.pycon.org/2016/schedule/presentation/1633/). Today we're going to make a Python library that is actually the Go webserver, for which we can write handlers in Python. If you'd like to play along at home, this code was written in Go 1.6 and Python 3.5 and the entire complete working thing is open source (MIT license) and links will be supplied shortly.
 
 First, a refresher:
 
@@ -77,7 +77,7 @@ super-optimized code, you can now run Go code just the same. More or less.
 
 ## Considerations
 
-Before throwing everything away and starting fresh using this new-found power, there are some challenges that need to be considered.
+Before throwing everything away and starting fresh using this newfound power, there are some challenges that need to be considered.
 
 ### Runtime Overhead
 
@@ -112,7 +112,7 @@ treat it as immutable read-only data when it's too big to be copied.
 ### Runtime Demilitarized Zone
 
 When mediating calls between two runtimes like Go and Python, we use C land in
-between them as a kind of demilitarized zone because C has no runtime and we
+between them as a kind of demilitarized zone, because C has no runtime and we
 can trust it to not mess with our data all willynilly.
 
 
@@ -179,7 +179,7 @@ Additional reading material:
 ### Calling Go from C
 
 To call Go from C, we'll need to compile our Go
-as a shared object and import it. To identify the which Go API we want to
+as a shared object and import it. To identify which Go API we want to
 expose in C land, we export it explicitly with an `//export ...` comment 
 directive.
 
@@ -207,7 +207,7 @@ Three things about this code snippet:
    creating an injection point for spawning the Go runtime.
 
 3. There are many nuances regarding passing memory beyond the Go boundary which 
-   are not expressed in this basic example, more on that in the links at the end 
+   are not expressed in this basic example. You can learn more on that in the links at the end 
    of the section.
 
 ```
@@ -237,7 +237,7 @@ $ ./answer
 42
 ```
 
-Success, we called Go code from C.
+Success! We called Go code from C.
 
 More specific reading in the aforementioned links:
 
@@ -247,7 +247,7 @@ More specific reading in the aforementioned links:
 
 ## World of Python
 
-Now onto the Python side of this business. Same idea, let's look at how to call 
+Now onto the Python side of this business. Same idea, so let's look at how to call 
 Python from C and C from Python.
 
 ### Calling C from Python
@@ -308,9 +308,9 @@ $ python answer.py
 42
 ```
 
-Success, we called C from Python!
+Success: we called C from Python!
 
-This was cheating a bit, same way we cheated in the Go version because the C was 
+This was cheating a bit, in the same way we cheated in the Go version because the C was 
 embedded inside of Python code. But, it's not that far from a real world 
 scenario: We could just as easily `#include` our way into all kinds of external 
 C logic, even if that part is embedded.
@@ -410,23 +410,23 @@ called from the C side of things.
 
 There is a tricky bit here, though: The `HandleFunc` callback function pointer 
 accepts two parameters: `http.ResponseWriter` and `*http.Request`. This isn't 
-going to fly for two reasons: The first one is a Go *interface* and C has no 
-idea what an interface is (let alone Python) and the second one is a pointer to 
-an instance which we can't share across the runtime boundary because that's a 
+going to fly for two reasons. The first parameter is a Go *interface* and C has no 
+idea what an interface is (nor does Python). The second parameter is a pointer to 
+an instance which we can't share across the runtime boundary, because that's a 
 big no-no (see the *Considerations* section).
 
-For the `*http.Request` datastructure, we make a C equivalent `typedef struct 
-Request_ { ... }`, populate that by copying the necessary values, and passing it 
+For the `*http.Request` datastructure, we make a C equivalent (`typedef struct 
+Request_ { ... }`), populate that by copying the necessary values, and pass it 
 forward instead.
 
 For interfaces, we work around it by creating additional exported shims in Go 
 where all they do is call the interface's function in Go-land on behalf of C 
 (more on that in a moment).
 
-There is one more weird trick here: We need to pass somekind of reference to 
-which interface instance we're talking about, get that back, and call the 
+There is one more weird trick here: We need to pass some kind of reference to 
+whichever interface instance we're talking about, get that back, and call the 
 original interface without passing any memory pointers across the runtime. How 
-do we do that safely? Our own basic pointer registry!
+do we do that safely? With our own basic pointer registry!
 
 ![Pointer Proxy](images/ptrproxy.png)
 
