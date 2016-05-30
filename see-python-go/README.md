@@ -1,6 +1,6 @@
 # See Python, See Python Go, Go Python Go
 
-  ***(Thunderous voiceover)*** *In a world where Python runs Go and Go runs Python, only one was brave enough to learn their secrets. Nothing is sacred as two runtimes battle it out in the boiling wasteland called C.*
+  ***(Thunderous voiceover)*** *In a world where Python runs Go and Go runs Python, only one man was brave enough to learn their secrets. Nothing is sacred as two runtimes battle it out in the boiling wasteland called C.*
 
 Ahem, hello. This post is a more detailed overview of my [PyCon 2016 talk of the same title](https://us.pycon.org/2016/schedule/presentation/1633/). Today we're going to make a Python library that is actually the Go webserver, for which we can write handlers in Python. If you'd like to play along at home, this code was written in Go 1.6 and Python 3.5 and the entire complete working thing is open source (MIT license) and links will be supplied shortly.
 
@@ -590,9 +590,11 @@ the sake of some laughs:
 
 <img src="images/lolbenchmarks.png" height="50%" width="50%" alt="lolbenchmarks" />
 
-Conditions: `ab` doing 10,000 requests with 10 concurrency on my 💻.
+Conditions: `ab` doing 10,000 requests with 10 concurrency on my 💻. If you want to see how it stands up on Heroku, just hit the deploy button and send some traffic to it:
 
-These are all basic "Hello, world\n" handlers. The first one is straight-up Go, then it's Go-to-C, then it's Go-to-C-to-Python (gohttp-python). It does pretty well.
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/shazow/gohttplib-heroku)
+
+These are all basic "Hello, world\n" handlers. The first one is straight-up Go, then it's Go-to-C, then it's Go-to-C-to-Python (gohttp-python). It does pretty well. 
 
 Keep in mind that this is with 10 concurrent requests, so werkzeug-flask probably chokes more on the concurrency than the response time being slow.
 
