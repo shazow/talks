@@ -21,9 +21,10 @@
             .footnote {
                 color: #666; font-size: 0.8em;
                 position: absolute;
-                bottom: 0;
+                bottom: 3em;
                 left: 0;
-                margin: 1em;
+                width: 100%;
+                text-align: center;
             }
             table { width: 100%; line-height: 1.5em; font-size: 1.2em; text-align: right; }
             thead { text-align: right; }
@@ -37,12 +38,26 @@
                 margin-bottom: 0;
                 margin-top: 1.5em;
             }
-            .remark-slide-number::before {
-                content: "@shazow";
-                position: fixed;
-                left: 45%;
-                color: #6b1f03;
+            .remark-slide-number {
+                display: none;
             }
+            .remark-slide-content::before {
+                content: "Andrey Petrov · @shazow";
+                text-align: center;
+                color: #777;
+                position: absolute;
+                font-style: italic;
+                bottom: 0;
+                left: 4em;
+                line-height: 2em;
+            }
+            .remark-presenter-mode .remark-slide-number {
+                display: block;
+            }
+            .big code {
+                font-size: 1.6em;
+            }
+
         </style>
     </head>
     <body>
@@ -53,6 +68,19 @@ class: center, middle
 # See Python, See Python Go, Go Python Go
 
 Presented by **Andrey Petrov** at **PyCon 2016**
+
+---
+
+class: center, middle
+
+# Andrey Petrov
+
+## @shazow
+
+![shazow](images/shazow.png)
+
+*[urllib3](https://github.com/shazow/urllib3), [ssh-chat](https://github.com/shazow/ssh-chat), [briefmetrics](https://briefmetrics.com/), [colorblendy](http://colorblendy.com/), [tweepsect](http://tweepsect.com/), [funny tweets](https://twitter.com/shazow), and [more](https://shazow.net/)*
+
 
 ---
 
@@ -91,6 +119,26 @@ class: middle, center
 .gopher[![PyGopher](images/pygopher.png)]
 
 .footnote[Credit: Renee French &amp; Alice Tribuleva]
+
+---
+
+# Go in Python
+
+.big[
+```python
+import os
+
+os.system("go run main.go")
+```
+]
+
+--
+
+.center[
+## *lol just kidding*
+
+## 😂
+]
 
 ---
 
@@ -637,11 +685,11 @@ ResponseWriter.set_status(self, code)
 --
 
 * To use it, we need to pass a *pointer* through </br >
-  Go → C → Python → C → Go.
+  ☞ Go ⇢ C ⇢ Python ⇢ C ⇢ Go ☞
 
 --
 
-* Solution: Pointer Proxy!
+* Solution: Pointer Proxy! 💍
 
 ---
 
@@ -675,7 +723,7 @@ Now we can pass an opaque uint across enemy lines and it's perfectly safe.
 
 # Quick flashback: Translation layer
 
-One pointer proxy to rule them all.
+One pointer proxy to rule them all. 💍
 
 ```go
 var cpointers = PtrProxy()
@@ -683,7 +731,7 @@ var cpointers = PtrProxy()
 
 --
 
-In the callback, reference to bind them.
+In the callback, reference to bind them. ⛓
 
 ```go
 http.HandleFunc(pattern, func(w http.ResponseWriter, req *http.Request) {
@@ -698,7 +746,7 @@ http.HandleFunc(pattern, func(w http.ResponseWriter, req *http.Request) {
 
 --
 
-With pointer proxy, dereference to find them.
+With pointer proxy, dereference to find them. 🔎
 
 ```go
 func ResponseWriter_WriteHeader(wPtr C.uint, header C.int) {
@@ -744,35 +792,35 @@ func ResponseWriter_WriteHeader(wPtr C.uint, header C.int) {
 
 --
 
-* Memory leaks
+* Memory leaks 💦
 
 ???
 - The examples here are super rough, you'll likely need to explicitly free any memory allocated for C.
 
 --
 
-* Race conditions
+* Race conditions 🏃
 
 ???
 - If you're not careful with GILs and whatnot, you'll likely get race conditions.
 
 --
 
-* Context switching overhead
+* Context switching overhead 👩‍👩‍👧‍👦
 
 ???
 - Switching across runtimes does have overhead, such as thread-switching. This is a fairly expensive constant-time operation in Go.
 
 --
 
-* Probably security vulnerabilities because C is hard
+* Probably security issues because C is hard 💩
 
 ???
 - Anytime you're touching C, beware of vuln dragons.
 
 --
 
-* Architecture spaghetti
+* Architecture campanelle 🍝
 
 ???
 - Spaghetti can be delicious but messy.
@@ -831,8 +879,6 @@ class: center
 ![shazow](images/shazow.png)
 ]
 
-
----
     </textarea>
     <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
     </script>
