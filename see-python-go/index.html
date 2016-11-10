@@ -67,7 +67,7 @@ class: center, middle
 
 # See Python, See Python Go, Go Python Go
 
-Presented by **Andrey Petrov** at **PyCon 2016**
+Presented by **Andrey Petrov** at **PyCon Canada 2016**
 
 ---
 
@@ -110,6 +110,9 @@ class: center, middle
 --
 - Gophers!
 
+???
+(ETA: 3:30)
+
 ---
 
 class: middle, center
@@ -123,6 +126,8 @@ class: middle, center
 ---
 
 # Go in Python
+
+--
 
 .big[
 ```python
@@ -155,6 +160,8 @@ os.system("go run main.go")
 ???
 C can act as a bridge between any two languages that can call to/from C.
 
+(ETA: 5:00)
+
 ---
 
 # Challenges
@@ -175,6 +182,8 @@ C can act as a bridge between any two languages that can call to/from C.
    - Python: Classes, Generators, etc.
    - Oodles of other language-specific constructs
 
+???
+(ETA: 6:45)
 
 ---
 
@@ -289,6 +298,8 @@ def index():
 Translating a Go API into Python is a fun subjective exercise. It doesn't need
 to look like this, but it's a good example.
 
+(ETA: 10:30)
+
 ---
 
 class: center
@@ -397,6 +408,9 @@ int main() {
 }
 ```
 
+???
+(ETA: 16:30)
+
 ---
 
 class: full-image
@@ -488,6 +502,9 @@ static int (*add)(int x, int b);
 
 That's all we need for now. [More on CFFI embedding here](http://cffi.readthedocs.io/en/latest/embedding.html).
 
+???
+(ETA: 19:00)
+
 ---
 
 # Challenges
@@ -550,6 +567,11 @@ http.HandleFunc(pattern, func(w http.ResponseWriter, req *http.Request) {
     ...
 ```
 
+???
+Don't forget to C.free(...) all C types we allocate in Go land.
+
+(ETA: 21:00)
+
 ---
 
 # Overcoming Challenges
@@ -592,6 +614,39 @@ func ResponseWriter_Write(wPtr C.uint, cbuf *C.char, length C.int) C.int {
 func ResponseWriter_WriteHeader(wPtr C.uint, header C.int) {
     ...
 	(*(*http.ResponseWriter)(w)).WriteHeader(int(header))
+}
+```
+
+---
+
+# Challenge 2: Translation layer
+
+```go
+http.HandleFunc(pattern, func(w http.ResponseWriter, req *http.Request) {
+    ...
+})
+```
+
+Our Python code will need to use the `http.ResponseWriter` interface.
+
+```go
+ResponseWriter.Write([]byte) (int, error)
+ResponseWriter.WriteHeader(int)
+```
+
+```go
+//export ResponseWriter_Write (Fake Simplified Edition)
+func ResponseWriter_Write(writerPtr *void, cBuffer *char, length int) int {
+	buf := C.GoBytes(cBuffer, length)
+    ...
+	n, _ := writerPtr.(http.ResponseWriter).Write(buf)
+	return n
+}
+
+//export ResponseWriter_WriteHeader (Fake Simplified Edition)
+func ResponseWriter_WriteHeader(writerPtr *void, header int) {
+    ...
+	writerPtr.(http.ResponseWriter).WriteHeader(header)
 }
 ```
 
@@ -665,6 +720,9 @@ Python wrapper:
 ```python
 ResponseWriter.set_status(self, code)
 ```
+
+???
+(ETA: 23:00)
 
 ---
 
@@ -755,6 +813,9 @@ func ResponseWriter_WriteHeader(wPtr C.uint, header C.int) {
 }
 ```
 
+???
+(ETA: 25:00)
+
 ---
 
 # Recap
@@ -794,10 +855,24 @@ func ResponseWriter_WriteHeader(wPtr C.uint, header C.int) {
 
 * Memory leaks 💦
 
+--
+
+```go
+    a := C.CString(...)  // or C.CBytes(...)
+
+    ...
+
+    C.free(unsafe.Pointer(s))
+```
+
 ???
 - The examples here are super rough, you'll likely need to explicitly free any memory allocated for C.
 
---
+---
+
+# Other Considerations
+
+* Memory leaks 💦
 
 * Race conditions 🏃
 
@@ -824,6 +899,8 @@ func ResponseWriter_WriteHeader(wPtr C.uint, header C.int) {
 
 ???
 - Spaghetti can be delicious but messy.
+
+(ETA: 26:45)
 
 ---
 
@@ -866,6 +943,8 @@ class: center
 
 <small>Conditions: `ab` doing 10,000 requests with 10 concurrency on my 💻.</small>
 
+???
+(ETA: 28:00)
 
 ---
 
